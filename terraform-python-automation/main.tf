@@ -123,6 +123,7 @@ resource "aws_default_security_group" "default-sg" {
         protocol = "tcp"
         to_port = 22
     }
+
     ingress {
         cidr_blocks = [ "0.0.0.0/0" ]
         from_port = 8080
@@ -137,7 +138,8 @@ resource "aws_default_security_group" "default-sg" {
         protocol = "-1"
         to_port = 0
         prefix_list_ids = []
-    }
+    }   
+    
 
     tags = {
         Name: "${var.env_prefix}-default-sg"
@@ -174,6 +176,46 @@ resource "aws_key_pair" "ssh-key" {
 
 # creating ec2 instance
 resource "aws_instance" "myapp-server" {
+    ami = data.aws_ami.latest-amazon-linux-image.id
+    instance_type = var.instance_type
+
+    subnet_id = aws_subnet.myapp-subnet-1.id
+    vpc_security_group_ids = [ aws_default_security_group.default-sg.id ]
+    availability_zone = var.avail_zone
+
+    associate_public_ip_address = true
+    key_name = aws_key_pair.ssh-key.key_name
+
+    # installing docker and running nginx container
+    # this block will only get executed once on initial run
+    user_data = file("entry-script.sh")
+
+    tags = {
+      Name = "${var.env_prefix}-server"
+    }
+}
+
+resource "aws_instance" "myapp-server-two" {
+    ami = data.aws_ami.latest-amazon-linux-image.id
+    instance_type = var.instance_type
+
+    subnet_id = aws_subnet.myapp-subnet-1.id
+    vpc_security_group_ids = [ aws_default_security_group.default-sg.id ]
+    availability_zone = var.avail_zone
+
+    associate_public_ip_address = true
+    key_name = aws_key_pair.ssh-key.key_name
+
+    # installing docker and running nginx container
+    # this block will only get executed once on initial run
+    user_data = file("entry-script.sh")
+
+    tags = {
+      Name = "${var.env_prefix}-server"
+    }
+}
+
+resource "aws_instance" "myapp-server-three" {
     ami = data.aws_ami.latest-amazon-linux-image.id
     instance_type = var.instance_type
 
