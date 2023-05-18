@@ -186,7 +186,7 @@ resource "aws_instance" "myapp-server" {
 
     # installing docker and running nginx container
     # this block will only get executed once on initial run
-    user_data = file("entry-script.sh")
+    # user_data = file("entry-script.sh")
 
     tags = {
       Name = "${var.env_prefix}-server"
